@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using LinqSample1.Logic;
 using LinqSample1.Model;
 using Newtonsoft.Json;
