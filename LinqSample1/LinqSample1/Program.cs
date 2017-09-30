@@ -45,10 +45,7 @@ namespace LinqSample1
                 result.AddRange(validator.Validate());
             }
 
-            Console.WriteLine(JToken.Parse(
-                    JsonConvert.SerializeObject(result)
-                ).ToString(Formatting.Indented)
-            );
+            Console.WriteLine(JToken.Parse(JsonConvert.SerializeObject(result)).ToString(Formatting.Indented));
 
             Console.ReadKey();
         }
