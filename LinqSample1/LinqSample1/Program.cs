@@ -46,7 +46,6 @@ namespace LinqSample1
             }
 
             Console.WriteLine(JToken.Parse(JsonConvert.SerializeObject(result)).ToString(Formatting.Indented));
-
             Console.ReadKey();
         }
     }
