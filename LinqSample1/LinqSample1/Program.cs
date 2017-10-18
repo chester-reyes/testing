@@ -19,7 +19,7 @@ namespace LinqSample1
                     {
                         OrderHeaderID = 1,
                         OrderID = "Order 1",
-                        BillingAddress = new Address {AddressID = 3}
+                        BillingAddress = new Address {AddressID = 1}
                     },
                     OrderDetails = new List<OrderDetail>
                     {

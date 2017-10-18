@@ -19,6 +19,7 @@ namespace LinqSample1.Logic
                 new AddressValidatorResult
                 {
                     AddressID = _order.OrderHeader.BillingAddress.AddressID,
+                    AddressType = "BillingAddress",
                     Result = _order.AddressIDs.Any(x => x.AddressID == _order.OrderHeader.BillingAddress.AddressID)
                         ? "PASSED"
                         : "FAILED"
@@ -28,6 +29,7 @@ namespace LinqSample1.Logic
             result.AddRange(_order.OrderDetails.Select(y => new AddressValidatorResult
                 {
                     AddressID = y.ShippingAddress.AddressID,
+                    AddressType = "ShippingAddress",
                     Result = _order.AddressIDs.Any(z => z.AddressID == y.ShippingAddress.AddressID)
                         ? "PASSED"
                         : "FAILED"
