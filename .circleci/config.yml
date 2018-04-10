@@ -2,7 +2,6 @@ jobs:
  build:
    machine: true
    environment: &environment_variables
-     DOCKER_USER: chre2628
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
    steps:
@@ -23,12 +22,12 @@ jobs:
             if [[ ${project} != ".circleci" ]]; then
              echo "Building ${project}..."
              docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
-             docker pull "${DOCKER_USER?}/${project}:${DOCKER_CACHE_FROM?}" || true
+             docker pull "${DOCKER_USERNAME?}/${project}:${DOCKER_CACHE_FROM?}" || true
              docker build \
-                --cache-from "${DOCKER_USER?}/${project}:${DOCKER_CACHE_FROM?}" \
+                --cache-from "${DOCKER_USERNAME?}/${project}:${DOCKER_CACHE_FROM?}" \
                 --file "./HelloWorld/Dockerfile" \
-                --tag "${DOCKER_USER?}/${project}:latest" \
-                --tag "${DOCKER_USER?}/${project}:${CIRCLE_SHA1?}" \
+                --tag "${DOCKER_USERNAME?}/${project}:latest" \
+                --tag "${DOCKER_USERNAME?}/${project}:${CIRCLE_SHA1?}" \
              echo "Build execution complete.\n"
             fi 
            done
