@@ -21,23 +21,21 @@ jobs:
             touch /tmp/build-terminate-expired-servers.lambda
           fi
       - type: shell
-        name: "Build Circle CI  Lambda"
+        name: "HelloWorld Build"
         command: |
           if [ -f "/tmp/build-circleci.lambda" ]; then
-           echo "[BUILDING] CircleCI lambda"
-          else
-            echo "[SKIPPING] CircleCI Lambda"
-          fi
-      - type: shell
-        name: "Build Terminate Expired Servers Lambda"
-        command: |
-          if [ -f "/tmp/build-terminate-expired-servers.lambda" ]; then
-            echo "[BUILDING] Terminate-expired-servers Lambda"
-            cd /home/infra/aws/lambda/terminate_expired_servers
-            npm install
-          else
-            echo "[SKIPPING] Terminate-expired-servers Lambda"
-          fi
+           echo "[EXECUTING] HelloWorld Build"
+          
+           docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
+           docker pull "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" || true
+           docker build \
+             --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
+             --tag "${DOCKER_REPO?}:latest" \
+             --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}" 
+             
+          else 
+           echo "[SKIPPING] HelloWorld Build"
+          fi 
       - type: shell
         name: "Remove temporary files"
         command: |
