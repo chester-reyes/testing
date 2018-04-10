@@ -1,16 +1,15 @@
-FROM microsoft/aspnetcore:2.0 AS base
+FROM microsoft/aspnetcore-build:2.0 AS build
 WORKDIR /app
-EXPOSE 80
 
-FROM microsoft/aspnetcore-build:2.0 AS builder
+# copy source and test projects as distinct layers
 COPY . ./
 RUN dotnet restore --source https://api.nuget.org/v3/index.json --source http://nuget.hautelook.net/nuget/ --source http://nuget.erp.hautelook.net/dev/nuget
-RUN dotnet build -c Release -o /app
 
-FROM builder AS publish
-RUN dotnet publish -c Release -o /app
+# copy everything else and build
+RUN dotnet publish -c Release -o ./out --no-restore
 
-FROM base AS production
+# build runtime image
+FROM microsoft/aspnetcore:2.0 as runtime
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=build ./app/src/HauteLook.IMS.TransferFinancialConsumer/out .
 ENTRYPOINT ["dotnet", "HelloWorld.dll"]
