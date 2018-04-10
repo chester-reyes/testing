@@ -5,27 +5,41 @@ jobs:
      DOCKER_REPO: chre2628/helloworld
      DOCKER_CACHE_FROM: latest
    steps:
-     - checkout
+      - type: checkout
+      - type: shell
+        name: "Determine which Projects need to be built"
+        command: |
+          COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
+          echo "Commit range: " $COMMIT_RANGE
+          git diff $COMMIT_RANGE --name-status
+          if [[ $(git diff $COMMIT_RANGE --name-status | grep "HelloWorld") != "" ]]; then
+            echo "setting build circleci lambda"
+            touch /tmp/build-circleci.lambda
+          fi
+          if [[ $(git diff $COMMIT_RANGE --name-status | grep "lambda/terminate_expired_servers") != "" ]]; then
+            echo "setting build terminate-expired-servers lambda"
+            touch /tmp/build-terminate-expired-servers.lambda
+          fi
+      - type: shell
+        name: "Build Circle CI  Lambda"
+        command: |
+          if [ -f "/tmp/build-circleci.lambda" ]; then
+           echo "[BUILDING] CircleCI lambda"
+          else
+            echo "[SKIPPING] CircleCI Lambda"
+          fi
+      - type: shell
+        name: "Build Terminate Expired Servers Lambda"
+        command: |
+          if [ -f "/tmp/build-terminate-expired-servers.lambda" ]; then
+            echo "[BUILDING] Terminate-expired-servers Lambda"
+            cd /home/infra/aws/lambda/terminate_expired_servers
+            npm install
+          else
+            echo "[SKIPPING] Terminate-expired-servers Lambda"
+          fi
+      - type: shell
+        name: "Remove temporary files"
+        command: |
+          rm -f /tmp/build-*
 
-     - run:
-         name: docker build
-         command: |
-           docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
-           docker pull "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" || true
-           docker build \
-             --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
-             --tag "${DOCKER_REPO?}:latest" \
-             --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}" \
-             .
-     - run:
-         name: docker push (commit hash)
-         command: |
-           [[ "${CIRCLE_BRANCH?}" =~ ^pull/ ]] \
-             && echo "Skipping because this is a pull request" \
-             || docker push "${DOCKER_REPO?}:${CIRCLE_SHA1?}"
-     - run:
-         name: docker push (master -> latest)
-         command: |
-           [ ! "${CIRCLE_BRANCH?}" = "master" ] \
-             && echo "Skipping because this is not a merge into master" \
-             || docker push "${DOCKER_REPO?}:latest"
