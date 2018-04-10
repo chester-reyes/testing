@@ -15,6 +15,7 @@ jobs:
           if [[ $(git diff $COMMIT_RANGE --name-status | grep "HelloWorld") != "" ]]; then
             echo "setting build circleci lambda"
             touch /tmp/build-circleci.lambda
+            git diff $COMMIT_RANGE --name-status >> /tmp/build-circleci.lambda
           fi
           if [[ $(git diff $COMMIT_RANGE --name-status | grep "lambda/terminate_expired_servers") != "" ]]; then
             echo "setting build terminate-expired-servers lambda"
@@ -25,14 +26,7 @@ jobs:
         command: |
           if [ -f "/tmp/build-circleci.lambda" ]; then
            echo "[EXECUTING] HelloWorld Build"
-          
-           docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
-           docker pull "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" || true
-           docker build \
-             --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
-             --tag "${DOCKER_REPO?}:latest" \
-             --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}" 
-             
+           cat /tmp/buil-circleci.lambda
           else 
            echo "[SKIPPING] HelloWorld Build"
           fi 
