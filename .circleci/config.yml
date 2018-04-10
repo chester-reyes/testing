@@ -1,28 +1,9 @@
 version: 2
-
-workflows:
-  version: 2
-  deployment_pipeline:
-    jobs:
-      - build:
-          filters:
-            branches:
-              only:
-                - master
-
 jobs:
   build:
-    machine: true
-    environment: &environment_variables
-      DOCKER_REPO: chester-reyes/testing
-      DOCKER_CACHE_FROM: latest
+    docker:
+      - image: circleci/ruby:2.4.1
     steps:
       - checkout
-
-      - run:
-          name: docker build
-          command: |
-            docker build \
-              --file "testing/HelloWorld/DockerFile" \
-              --tag "hw:latest"
+      - run: echo "A first hello"
               
