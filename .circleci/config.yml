@@ -1,0 +1,31 @@
+jobs:
+ build:
+   machine: true
+   environment: &environment_variables
+     DOCKER_REPO: chre2628/helloworld
+     DOCKER_CACHE_FROM: latest
+   steps:
+     - checkout
+
+     - run:
+         name: docker build
+         command: |
+           docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
+           docker pull "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" || true
+           docker build \
+             --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
+             --tag "${DOCKER_REPO?}:latest" \
+             --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}" \
+             .
+     - run:
+         name: docker push (commit hash)
+         command: |
+           [[ "${CIRCLE_BRANCH?}" =~ ^pull/ ]] \
+             && echo "Skipping because this is a pull request" \
+             || docker push "${DOCKER_REPO?}:${CIRCLE_SHA1?}"
+     - run:
+         name: docker push (master -> latest)
+         command: |
+           [ ! "${CIRCLE_BRANCH?}" = "master" ] \
+             && echo "Skipping because this is not a merge into master" \
+             || docker push "${DOCKER_REPO?}:latest"
