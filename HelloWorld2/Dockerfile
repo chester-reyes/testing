@@ -3,10 +3,10 @@ WORKDIR /app
 
 # copy source and test projects as distinct layers
 COPY . ./
-RUN dotnet restore ./HelloWorld/HelloWorld2.sln --source https://api.nuget.org/v3/index.json --source http://nuget.hautelook.net/nuget/ --source http://nuget.erp.hautelook.net/dev/nuget
+RUN dotnet restore ./HelloWorld2/HelloWorld2.sln --source https://api.nuget.org/v3/index.json --source http://nuget.hautelook.net/nuget/ --source http://nuget.erp.hautelook.net/dev/nuget
 
 # copy everything else and build
-RUN dotnet publish ./HelloWorld/HelloWorld2.sln -c Release -o ./out --no-restore
+RUN dotnet publish ./HelloWorld2/HelloWorld2.sln -c Release -o ./out --no-restore
 
 # build runtime image
 FROM microsoft/aspnetcore:2.0 as runtime
