@@ -13,7 +13,7 @@ jobs:
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
           echo "Commit range: " $COMMIT_RANGE
           touch ${PROJECTS_TO_BUILD}
-          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' > ${PROJECTS_TO_BUILD}
+          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' | sort | uniq > ${PROJECTS_TO_BUILD}
       - type: shell
         name: "Build Projects"
         command: |
