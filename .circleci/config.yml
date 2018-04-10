@@ -31,5 +31,5 @@ jobs:
       - type: shell
         name: "Remove temporary files"
         command: |
-          rm -f /tmp/build-*
+          rm -f /tmp/${PROJECTS_TO_BUILD}
 
