@@ -34,12 +34,12 @@ jobs:
              echo "Pusing Build Artifact to Docker Repo."
              [[ "${CIRCLE_BRANCH?}" =~ ^pull/ ]] \
              && echo "Skipping because this is a pull request" \
-             || docker push "${DOCKER_USERNAME?}/${project}:${CIRCLE_SHA1?}"
+             || docker push "${DOCKER_USERNAME?}/${dockerRepo}:${CIRCLE_SHA1?}"
              
              echo "Updating latest."
              [ ! "${CIRCLE_BRANCH?}" = "master" ] \
              && echo "Skipping because this is not a merge into master" \
-             || docker push "${DOCKER_USERNAME?}/${project}:latest"
+             || docker push "${DOCKER_USERNAME?}/${dockerRepo}:latest"
              
              echo "Build execution complete.\n"
             fi 
