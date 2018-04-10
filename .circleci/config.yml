@@ -26,7 +26,7 @@ jobs:
              docker pull "${DOCKER_USER?}/${project}:${DOCKER_CACHE_FROM?}" || true
              docker build \
                 --cache-from "${DOCKER_USER?}/${project}:${DOCKER_CACHE_FROM?}" \
-                --file "./${project}/Dockerfile" \
+                --file "./HelloWorld/Dockerfile" \
                 --tag "${DOCKER_USER?}/${project}:latest" \
                 --tag "${DOCKER_USER?}/${project}:${CIRCLE_SHA1?}" \
              echo "Build execution complete.\n"
