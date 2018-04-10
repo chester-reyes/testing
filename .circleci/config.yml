@@ -14,23 +14,16 @@ jobs:
           echo "Commit range: " $COMMIT_RANGE
           touch ${PROJECTS_TO_BUILD}
           git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' > ${PROJECTS_TO_BUILD}
-          if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') == 0 ]]; then
-           echo "No projects to build."
-          else
-           echo "Project(s) to build:"
-           cat ${PROJECTS_TO_BUILD} | while read project;
-           do
-            echo " - ${project}"
-           done
-          fi
       - type: shell
         name: "Build Projects"
         command: |
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
            cat ${PROJECTS_TO_BUILD} | while read project;
-           do 
-            echo "Building ${project}..."
-            echo "Build execution complete.\n"
+           do
+            if [[ ${project} != ".circleci" ]]; then
+             echo "Building ${project}..."
+             echo "Build execution complete.\n"
+            fi 
            done
           else 
            echo "There are no projects to build."
