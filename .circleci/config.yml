@@ -23,6 +23,6 @@ jobs:
           name: docker build
           command: |
             docker build \
-              --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
-              --tag "${DOCKER_REPO?}:latest" \
-              --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}"
+              --file "testing/HelloWorld/DockerFile" \
+              --tag "HelloWorld:latest"
+              
