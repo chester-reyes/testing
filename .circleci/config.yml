@@ -19,7 +19,7 @@ jobs:
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
            cat ${PROJECTS_TO_BUILD} | while read project;
            do
-            dockerRepo=$(echo $project | | tr '[:upper:]' '[:lower:]')
+            dockerRepo=$(echo $project | tr '[:upper:]' '[:lower:]')
             if [[ ${project} != ".circleci" ]]; then
              echo "Building ${project}..."
              docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
