@@ -4,6 +4,7 @@ jobs:
    environment: &environment_variables
      DOCKER_REPO: chre2628/helloworld
      DOCKER_CACHE_FROM: latest
+     PROJECTS_TO_BUILD: /tmp/projects.to.build
    steps:
       - type: checkout
       - type: shell
@@ -11,12 +12,12 @@ jobs:
         command: |
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
           echo "Commit range: " $COMMIT_RANGE
-          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' > /tmp/projects.to.build
-          if [[ $(wc -l /tmp/projects.to.build | awk '{print $1}') == 0 ]]; then
+          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' > ${PROJECTS_TO_BUILD}
+          if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') == 0 ]]; then
            echo "No projects to build."
           else
            echo "Project(s) to build:"
-           cat /tmp/build-circleci.lambda | while read project;
+           cat ${PROJECTS_TO_BUILD} | while read project;
            do
             echo " - ${project}"
            done
@@ -24,10 +25,11 @@ jobs:
       - type: shell
         name: "Build Projects"
         command: |
-          if [[ $(wc -l /tmp/projects.to.build | awk '{print $1}') > 0 ]]; then
-           cat /tmp/build-circleci.lambda | while read project;
+          if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
+           cat ${PROJECTS_TO_BUILD} | while read project;
            do 
-            echo "Building ${project}"
+            echo "Building ${project}..."
+            echo "Build execution complete.\n"
            done
           else 
            echo "There are no projects to build."
