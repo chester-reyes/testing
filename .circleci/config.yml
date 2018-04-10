@@ -1,8 +1,28 @@
 version: 2
+
+workflows:
+  version: 2
+  deployment_pipeline:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only:
+                - master
+
 jobs:
   build:
-    docker:
-      - image: circleci/ruby:2.4.1
+    machine: true
+    environment: &environment_variables
+      DOCKER_REPO: chester-reyes/testing
+      DOCKER_CACHE_FROM: latest
     steps:
       - checkout
-      - run: echo "A first hello"
+
+      - run:
+          name: docker build
+          command: |
+            docker build \
+              --cache-from "${DOCKER_REPO?}:${DOCKER_CACHE_FROM?}" \
+              --tag "${DOCKER_REPO?}:latest" \
+              --tag "${DOCKER_REPO?}:${CIRCLE_SHA1?}"
