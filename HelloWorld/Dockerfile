@@ -13,3 +13,5 @@ FROM microsoft/aspnetcore:2.0 as runtime
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "HelloWorld.dll"]
+
+
