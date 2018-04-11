@@ -12,7 +12,7 @@ jobs:
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
           echo "Commit range: " $COMMIT_RANGE
           touch ${PROJECTS_TO_BUILD}
-          git diff $COMMIT_RANGE --name-status | grep "/" | cut -f2 | awk -F'/' '{print $1}' | sort | uniq > ${PROJECTS_TO_BUILD}
+          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' | sort | uniq > ${PROJECTS_TO_BUILD}
       - type: shell
         name: "Build Projects"
         command: |
@@ -20,7 +20,7 @@ jobs:
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
                dockerRepo=$(echo $project | tr '[:upper:]' '[:lower:]')
-               if [[ ${project} != ".circleci" ]]; then
+               if if [[ `echo ${project} | grep -v "\."` != "" ]]; then
                  echo "Building ${project}..."
                  docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                  docker pull "${DOCKER_USERNAME?}/${dockerRepo}:${DOCKER_CACHE_FROM?}" || true
