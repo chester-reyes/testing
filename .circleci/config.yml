@@ -7,7 +7,7 @@ jobs:
    steps:
       - type: checkout
       - type: shell
-        name: "Determine which Projects need to be built"
+        name: "Determine Projects to Build."
         command: |
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
           echo "Commit range: " $COMMIT_RANGE
