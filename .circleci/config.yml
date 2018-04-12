@@ -13,6 +13,7 @@ jobs:
           echo "Commit range: " $COMMIT_RANGE
           touch ${PROJECTS_TO_BUILD}
           git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' | sort | uniq > ${PROJECTS_TO_BUILD}
+          cat ${PROJECTS_TO_BUILD}
       - type: shell
         name: "Build Projects"
         command: |
