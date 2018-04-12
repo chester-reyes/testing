@@ -19,7 +19,6 @@ jobs:
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
-     #         dockerRepo=$(echo $project | tr '[:upper:]' '[:lower:]')
                dockerRepo=$(echo $project)
                if [[ `echo ${project} | grep -v "\."` != "" ]]; then
                  echo "Building ${project}..."
