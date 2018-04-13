@@ -32,7 +32,7 @@ jobs:
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
                if [ -e "${project}/Dockerfile" ]; then
-                  dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk '{print $2}')
+                  dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
                   echo "Building ${project}..."
                   docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                   docker pull "${DOCKER_REPO?}/${dockerImage}:${DOCKER_CACHE_FROM?}" || true
