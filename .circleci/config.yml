@@ -17,10 +17,7 @@ jobs:
 
           echo "Creating Temporary Files."
           touch ${COMMITTED_FILES}  
-          echo " - ${COMMITED_FILES} Created."
-
           touch ${PROJECTS_TO_BUILD} 
-          echo " - ${PROJECTS_TO_BUILD Created."
 
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
