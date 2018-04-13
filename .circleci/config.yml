@@ -33,7 +33,7 @@ jobs:
           do 
             if [[ -d "${line}" ]]; then
                 echo "    - ${line}"
-		echo ${line} >> ${PROJECTS_TO_BUILD}
+                echo ${line} >> ${PROJECTS_TO_BUILD}
             fi
           done
 
