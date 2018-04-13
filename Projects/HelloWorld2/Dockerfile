@@ -3,7 +3,7 @@ WORKDIR /app
 
 # copy source and test projects as distinct layers
 COPY . ./
-RUN dotnet restore ./HelloWorld2/HelloWorld.sln --source https://api.nuget.org/v3/index.json --source http://nuget.hautelook.net/nuget/ --source http://nuget.erp.hautelook.net/dev/nuget
+RUN dotnet restore ./HelloWorld2/HelloWorld.sln --source https://api.nuget.org/v3/index.json 
 
 # copy everything else and build
 RUN dotnet publish ./HelloWorld2/HelloWorld.sln -c Release -o ./out --no-restore
@@ -13,5 +13,4 @@ FROM microsoft/aspnetcore:2.0 as runtime
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["dotnet", "HelloWorld.dll"]
-
 

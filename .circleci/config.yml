@@ -2,6 +2,7 @@ jobs:
  build:
    machine: true
    environment: &environment_variables
+     DOCKER_REPO: hautelook
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
      COMMITTED_FILES: /tmp/committed.files
@@ -15,11 +16,11 @@ jobs:
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
 
           echo "Creating Temporary Files."
-          touch ${COMMITTED_FILES}
-          touch ${PROJECTS_TO_BUILD}
+          touch ${COMMITTED_FILES} && echo " - ${COMMITED_FILES} Created."
+          touch ${PROJECTS_TO_BUILD} && echo " - ${PROJECTS_TO_BUILD Created."
 
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
-            echo "Commit range: ${COMMIT_RANGE}"
+            echo "Commit Range: ${COMMIT_RANGE}"
             git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq >> ${COMMITTED_FILES}
           else
             echo "Commit ID: ${COMMIT_RANGE}"
@@ -27,12 +28,13 @@ jobs:
           fi
 
           echo "Grabbing Project Folder Names."
-          cat ${COMMITED_FILES} | awk -F'/' '{print $2}' | grep -v "" > ${PROJECTS_TO_BUILD}
-
-          echo "Possible Project(s):"
-          cat ${PROJECTS_TO_BUILD} | while read project;
-          do
-            echo " - ${project}"
+          echo " - Possible Projects To Build."
+          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | while read line;
+          do 
+            if [[ -d "${line}" ]]; then
+                echo "    - ${line}"
+		echo ${line} >> ${PROJECTS_TO_BUILD}
+            fi
           done
 
       - type: shell
@@ -42,26 +44,26 @@ jobs:
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
                if [ -e "${project}/Dockerfile" ]; then
-                  dockerRepo=$(echo $project | tr '[:upper:]' '[:lower:]')
+                  dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk '{print $2}')
                   echo "Building ${project}..."
                   docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
-                  docker pull "${DOCKER_USERNAME?}/${dockerRepo}:${DOCKER_CACHE_FROM?}" || true
+                  docker pull "${DOCKER_REPO?}/${dockerImage}:${DOCKER_CACHE_FROM?}" || true
                   docker build \
-                     --cache-from "${DOCKER_USERNAME?}/${project}:${DOCKER_CACHE_FROM?}" \
-                     --file "./Projects/${project}/Dockerfile" \
-                     --tag "${DOCKER_USERNAME?}/${dockerRepo}:latest" \
-                     --tag "${DOCKER_USERNAME?}/${dockerRepo}:${CIRCLE_SHA1?}" \
+                     --cache-from "${DOCKER_REPO?}/${dockerImage}:${DOCKER_CACHE_FROM?}" \
+                     --file "${project}/Dockerfile" \
+                     --tag "${DOCKER_REPO?}/${dockerImage}:latest" \
+                     --tag "${DOCKER_REPO?}/${dockerImage}:${CIRCLE_SHA1?}" \
                      .
 
                   echo "Pushing Build Artifact to Docker Repo."
-                  [[ "${CIRCLE_BRANCH?}" =~ ^pull/ ]] \
+                  [ ! "${CIRCLE_BRANCH?}" = "master" ] \
                     && echo "Skipping because this is a pull request" \
-                    || docker push "${DOCKER_USERNAME?}/${dockerRepo}:${CIRCLE_SHA1?}"
+                    || docker push "${DOCKER_REPO?}/${dockerImage}:${CIRCLE_SHA1?}"
 
                   echo "Updating latest."
                   [ ! "${CIRCLE_BRANCH?}" = "master" ] \
                     && echo "Skipping because this is not a merge into master" \
-                    || docker push "${DOCKER_USERNAME?}/${dockerRepo}:latest"
+                    || docker push "${DOCKER_REPO?}/${dockerImage}:latest"
                   echo "Build execution complete.\n"
                else
                   echo "Skipping build for ${project}. No dockerfile found."
