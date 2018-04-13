@@ -17,7 +17,7 @@ jobs:
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
-            git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
+            git diff $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
           else
             echo "Commit ID: ${COMMIT_RANGE}"
             git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
