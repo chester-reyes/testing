@@ -16,8 +16,11 @@ jobs:
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
 
           echo "Creating Temporary Files."
-          touch ${COMMITTED_FILES} && echo " - ${COMMITED_FILES} Created."
-          touch ${PROJECTS_TO_BUILD} && echo " - ${PROJECTS_TO_BUILD Created."
+          touch ${COMMITTED_FILES}  
+          echo " - ${COMMITED_FILES} Created."
+
+          touch ${PROJECTS_TO_BUILD} 
+          echo " - ${PROJECTS_TO_BUILD Created."
 
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
