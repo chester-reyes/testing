@@ -1,59 +1,33 @@
-determine_projects_to_build: &determine_projects_to_build
-  - type: shell 
-      name: "Determine Projects to Build."
-        command: |
-          COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
-          if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
-            echo "Commit Range: ${COMMIT_RANGE}"
-            git diff $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
-          else
-            echo "Commit ID: ${COMMIT_RANGE}"
-            git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
-          fi
-          echo "Grabbing Project Folder Names."
-          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' > ${PROJECTS_TO_BUILD}
-
-terraform_execution: &terraform_execution
-  - type: shell
-      name: terraform plan
-        command: |
-          cat ${PROJECTS_TO_BUILD} | while read project;
-          do
-            cd ${CIRCLE_WORKING_DIRECTORY}/${project}/deploy/dev
-            dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
-              echo "Terraform Initialization"
-              terraform init
-               
-              echo "Terraform Plan"
-              terraform plan -var "image=${DOCKER_REPO?}-${dockerImage}:${CIRCLE_SHA1?}" -out terraform_plan
-              
-              echo "Terraform Apply."
-              [ ! "${CIRCLE_BRANCH}" = "master" ] \
-                && echo "Skipping terraform apply because this is not a merge into master" \
-                || terraform apply terraform_plan  
-          done
-
-clean_up: &clean_up
-  - type: shell
-      name: "Remove temporary files"
-      command: |
-        rm -f ${PROJECTS_TO_BUILD}
-        rm -f ${OMMITTED_FILES
-        
-        
+aliases:
+    - &determine_projects_to_build
+       |
+         COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
+         if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
+           echo "Commit Range: ${COMMIT_RANGE}"
+           git diff $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
+         else
+           echo "Commit ID: ${COMMIT_RANGE}"
+           git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
+         fi
+           echo "Grabbing Project Folder Names."
+           cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' > ${PROJECTS_TO_BUILD}
+         
+         
 version: 2
 
 jobs:
  build:
    machine: true
    environment: &environment_variables
-     DOCKER_REPO: hautelook/erp-shipping
+     DOCKER_REPO: chre2628/testing
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
      COMMITTED_FILES: /tmp/committed.files
    steps:
       - type: checkout
-      <<: *determine_projects_to_build
+      - type: shell 
+        name: "Determine Projects to Build."
+        command: *determine_projects_to_build
       - type: shell
         name: "Build Projects"
         command: |
@@ -87,7 +61,11 @@ jobs:
           else
              echo "There are no projects to build."
           fi
-      <<: *clean_up
+      - type: shell
+        name: "Remove temporary files"
+        command: |
+           rm -f ${PROJECTS_TO_BUILD}
+           rm -f ${OMMITTED_FILES
 
  deploy_qa:
    machine: true
