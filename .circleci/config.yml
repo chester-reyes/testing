@@ -1,3 +1,5 @@
+version: 2
+
 jobs:
  build:
    machine: true
@@ -6,7 +8,6 @@ jobs:
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
      COMMITTED_FILES: /tmp/committed.files
-
    steps:
       - type: checkout
 
@@ -14,7 +15,6 @@ jobs:
         name: "Determine Projects to Build."
         command: |
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
-
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
             git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
@@ -22,20 +22,8 @@ jobs:
             echo "Commit ID: ${COMMIT_RANGE}"
             git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
           fi
-
           echo "Grabbing Project Folder Names."
-          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | while read line;
-          do 
-            if [[ -d "${line}" ]]; then
-                echo ${line}
-            fi
-          done > ${PROJECTS_TO_BUILD}
-
-          echo "Possible Projects to Build."
-          cat ${PROJECTS_TO_BUILD} | while read project;
-          do
-            echo " - ${project}"
-          done 
+          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' > ${PROJECTS_TO_BUILD}
 
       - type: shell
         name: "Build Projects"
