@@ -4,16 +4,37 @@ jobs:
    environment: &environment_variables
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
+     COMMITTED_FILES: /tmp/committed.files
+
    steps:
       - type: checkout
+
       - type: shell
         name: "Determine Projects to Build."
         command: |
-          COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | sed 's:^.*/compare/::g')
-          echo "Commit range: " $COMMIT_RANGE
+          COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
+
+          echo "Creating Temporary Files."
+          touch ${COMMITTED_FILES}
           touch ${PROJECTS_TO_BUILD}
-          git diff $COMMIT_RANGE --name-status | cut -f2 | awk -F'/' '{print $1}' | sort | uniq > ${PROJECTS_TO_BUILD}
-          cat ${PROJECTS_TO_BUILD}
+
+          if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
+            echo "Commit range: ${COMMIT_RANGE}"
+            git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq >> ${COMMITTED_FILES}
+          else
+            echo "Commit ID: ${COMMIT_RANGE}"
+            git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq >> ${COMMITTED_FILES}
+          fi
+
+          echo "Grabbing Project Folder Names."
+          cat ${COMMITED_FILES} | awk -F'/' '{print $2}' | grep -v "" > ${PROJECTS_TO_BUILD}
+
+          echo "Possible Project(s):"
+          cat ${PROJECTS_TO_BUILD} | while read project;
+          do
+            echo " - ${project}"
+          done
+
       - type: shell
         name: "Build Projects"
         command: |
@@ -27,7 +48,7 @@ jobs:
                   docker pull "${DOCKER_USERNAME?}/${dockerRepo}:${DOCKER_CACHE_FROM?}" || true
                   docker build \
                      --cache-from "${DOCKER_USERNAME?}/${project}:${DOCKER_CACHE_FROM?}" \
-                     --file "${project}/Dockerfile" \
+                     --file "./Projects/${project}/Dockerfile" \
                      --tag "${DOCKER_USERNAME?}/${dockerRepo}:latest" \
                      --tag "${DOCKER_USERNAME?}/${dockerRepo}:${CIRCLE_SHA1?}" \
                      .
@@ -41,16 +62,17 @@ jobs:
                   [ ! "${CIRCLE_BRANCH?}" = "master" ] \
                     && echo "Skipping because this is not a merge into master" \
                     || docker push "${DOCKER_USERNAME?}/${dockerRepo}:latest"
-
                   echo "Build execution complete.\n"
                else
                   echo "Skipping build for ${project}. No dockerfile found."
                fi
              done
-          else 
+          else
              echo "There are no projects to build."
-          fi 
+          fi
+
       - type: shell
         name: "Remove temporary files"
         command: |
-          rm -f /tmp/${PROJECTS_TO_BUILD}
+          rm -f ${PROJECTS_TO_BUILD}
+          rm -f ${OMMITTED_FILES}
