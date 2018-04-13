@@ -15,27 +15,27 @@ jobs:
         command: |
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
 
-          echo "Creating Temporary Files."
-          touch ${COMMITTED_FILES}  
-          touch ${PROJECTS_TO_BUILD} 
-
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
-            git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq >> ${COMMITTED_FILES}
+            git diff $COMMIT_RANGE --name-status | egrep "$[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
           else
             echo "Commit ID: ${COMMIT_RANGE}"
-            git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq >> ${COMMITTED_FILES}
+            git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" | sort | uniq > ${COMMITTED_FILES}
           fi
 
           echo "Grabbing Project Folder Names."
-          echo " - Possible Projects To Build."
           cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | while read line;
           do 
             if [[ -d "${line}" ]]; then
-                echo "    - ${line}"
-                echo ${line} >> ${PROJECTS_TO_BUILD}
+                echo ${line}
             fi
-          done
+          done > ${PROJECTS_TO_BUILD}
+
+          echo "Possible Projects to Build."
+          cat ${PROJECTS_TO_BUILD} | while read project;
+          do
+            echo " - ${project}"
+          done 
 
       - type: shell
         name: "Build Projects"
