@@ -29,13 +29,12 @@ jobs:
       - type: shell
         name: "Build Projects"
         command: |
-          ls -ltr /home/circleci/project
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
                if [ -d "${project}" ]; then
                  echo " - Changing to Project Directory ${project}"
-                 cd ${CIRCLE_WORKING_DIRECTORY}/${CIRCLE_PROJECT_REPONAME}/${project} 
+                 cd /home/circleci/project/${project} 
                  
                  if [ -e "./Dockerfile" ]; then
                    dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
