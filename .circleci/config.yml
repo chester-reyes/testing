@@ -4,7 +4,8 @@ jobs:
  build:
    machine: true
    environment: &environment_variables
-     DOCKER_REPO: hautelook/erp-shipping
+     HOME_PROJECT: /home/circleci/project
+     DOCKER_REPO: hautelook/${CIRCLE_PROJECT_REPONAME}
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
      COMMITTED_FILES: /tmp/committed.files
@@ -38,7 +39,7 @@ jobs:
                else
                  dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
                  echo " - Changing to Project Directory: ${dockerImage}"
-                 cd /home/circleci/project/${project} 
+                 cd ${HOME_PROJECT}/${project} 
                  
                  if [ -e "./Dockerfile" ]; then
                    echo " - ${dockerImage} build initiated."
