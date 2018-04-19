@@ -34,7 +34,7 @@ jobs:
              do
                if [ -d "${project}" ]; then
                  echo " - Changing to Project Directory ${project}"
-                 cd ${CIRCLE_WORKING_DIRECTORY}/${project} 
+                 cd ${CIRCLE_WORKING_DIRECTORY}/${CIRCLE_PROJECT_REPONAME}/${project} 
                  
                  if [ -e "./Dockerfile" ]; then
                    dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
