@@ -41,7 +41,7 @@ jobs:
                  cd ${HOME_PROJECT}/${project} 
                  
                  if [ -e "./Dockerfile" ]; then
-                   echo "  - ${dockerImage} Build Initiated."
+                   echo "  - Build Initiated."
                    docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}" 1>/dev/null
                    docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 1>/dev/null 2>/dev/null || true
                    docker build \
@@ -55,15 +55,14 @@ jobs:
                      echo "    - Docker Build for ${dockerImage} failed."
                      exit 1
                    else 
-                     cat /tmp/${dockerImage}.log
                      echo "    - Pushing Build Artifact to Docker Repo."
                      [ ! "${CIRCLE_BRANCH?}" = "master" ] \
-                       && echo "Skipping because this is a pull request" \
+                       && echo "     - Skipping because this is a pull request" \
                        || docker push "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${CIRCLE_SHA1?}"
                    
                      echo "    - Updating latest."
                      [ ! "${CIRCLE_BRANCH?}" = "master" ] \
-                       && echo "Skipping because this is not a merge into master" \
+                       && echo "     - Skipping because this is not a merge into master" \
                        || docker push "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:latest"
                    fi 
                    
