@@ -57,7 +57,7 @@ jobs:
                  fi
                else
                   echo "${project} does not exist or not an actual project."
-                  ls -ltr ${CIRCLE_WORKING_DIRECTORY}/${project}
+                  ls -ltr ${CIRCLE_WORKING_DIRECTORY}
                fi
              done
           else
