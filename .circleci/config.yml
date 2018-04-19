@@ -29,6 +29,7 @@ jobs:
       - type: shell
         name: "Build Projects"
         command: |
+          ls -ltr /home/circleci/project
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
