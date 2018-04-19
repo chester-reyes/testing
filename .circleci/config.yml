@@ -30,37 +30,41 @@ jobs:
         name: "Build Projects"
         command: |
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
+             echo "Processing contents of temporary file..."
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
-               if [ -d "${project}" ]; then
-                 echo " - Changing to Project Directory ${project}"
+               if [ -f "${project}" ]; then
+                 echo " - SKIPPING: ${project} is not a project folder."
+               else
+                 dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
+                 echo " - Changing to Project Directory: ${dockerImage}"
                  cd /home/circleci/project/${project} 
                  
                  if [ -e "./Dockerfile" ]; then
-                   dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
-                   echo " - Building ${project}..."
+                   echo " - ${dockerImage} build initiated."
                    docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                    docker pull "${DOCKER_REPO?}-${dockerImage}:${DOCKER_CACHE_FROM?}" || true
                    docker build \
                      --cache-from "${DOCKER_REPO?}-${dockerImage}:${DOCKER_CACHE_FROM?}" \
-                     --file "${project}/Dockerfile" \
+                     --file "./Dockerfile" \
                      --tag "${DOCKER_REPO?}-${dockerImage}:latest" \
                      --tag "${DOCKER_REPO?}-${dockerImage}:${CIRCLE_SHA1?}" \
                      .
+                   
                    echo " - Pushing Build Artifact to Docker Repo."
                    [ ! "${CIRCLE_BRANCH?}" = "master" ] \
                      && echo "Skipping because this is a pull request" \
                      || docker push "${DOCKER_REPO?}-${dockerImage}:${CIRCLE_SHA1?}"
+                   
                    echo " - Updating latest."
                    [ ! "${CIRCLE_BRANCH?}" = "master" ] \
                      && echo "Skipping because this is not a merge into master" \
                      || docker push "${DOCKER_REPO?}-${dockerImage}:latest"
+                   
                    echo "Build execution complete.\n"
                  else
-                  echo "Skipping build for ${project}. No dockerfile found."
+                   echo "SKIPPING: No dockerfile found for ${project}."
                  fi
-               else
-                  echo "${project} does not exist or not an actual project."
                fi
              done
           else
