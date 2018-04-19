@@ -25,6 +25,7 @@ jobs:
           fi
           echo "Grabbing Project Folder Names."
           cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | sort | uniq > ${PROJECTS_TO_BUILD}
+          cat ${PROJECTS_TO_BUILD}
       - type: shell
         name: "Build Projects"
         command: |
