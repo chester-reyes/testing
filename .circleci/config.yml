@@ -3,18 +3,21 @@ version: 2
 jobs:
  build:
    machine: true
+
    environment: &environment_variables
      HOME_PROJECT: /home/circleci/project
      DOCKER_CACHE_FROM: latest
      PROJECTS_TO_BUILD: /tmp/projects.to.build
      COMMITTED_FILES: /tmp/committed.files
      TERRAFORM_VERSION: 0.10.8
+
    steps:
       - type: checkout
 
       - type: shell
         name: "Determine Projects to Build."
         command: |
+          touch ${PROJECTS_TO_BUILD}
           COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}')
           if [[ `echo ${COMMIT_RANGE} | grep "\.\."` != "" ]]; then
             echo "Commit Range: ${COMMIT_RANGE}"
@@ -25,8 +28,13 @@ jobs:
             git --version
           fi
           echo "Grabbing Project Folder Names."
-          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | sort | uniq > ${PROJECTS_TO_BUILD}
-          cat ${PROJECTS_TO_BUILD}
+          cat ${COMMITTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | sort | uniq | while read line;
+          do
+            if [ ! -f ${line} ]; then
+              echo ${line} >> ${PROJECTS_TO_BUILD} 
+            fi
+          done
+
       - type: shell
         name: "Build Projects"
         command: |
@@ -82,6 +90,7 @@ jobs:
           else
              echo "There are no projects to build."
           fi
+
       - type: shell
         name: "Remove temporary files"
         command: |
