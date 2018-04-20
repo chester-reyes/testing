@@ -48,7 +48,7 @@ jobs:
                  
                if [ -e "./Dockerfile" ]; then
                  echo "  - Build Initiated."
-                 dockerLogin=$(docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}" 2>&1)
+                 dockerLogin=$(docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}" 2>&1 | grep -v "WARNING")
                  if [ "${dockerLogin}" != "Login Succeeded" ]; then
                    echo "    - Docker Login Failed: ERROR - [${dockerLogin}]"
                    exit 1
