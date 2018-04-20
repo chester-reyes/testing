@@ -56,8 +56,9 @@ jobs:
                    echo "    - Docker ${dockerLogin}"
                  fi
 
+                 echo "    - Performing Docker Pull"
                  dockerPull=$(docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 2>&1) 
-                 echo "    - Docker Pull Status: ${dockerPull}"
+                 echo "      - Docker Pull Status: ${dockerPull}"
 
                  docker build \
                    --cache-from "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" \
