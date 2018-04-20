@@ -56,10 +56,8 @@ jobs:
                    echo "    - Docker ${dockerLogin}"
                  fi
 
-                 echo "    - Performing Docker Pull"
-                 dockerPull=$(docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 2>&1) 
-                 echo "      - Docker Pull Status: ${dockerPull}"
-
+                 echo "    - Performing Docker Build"
+                 docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 2>&1 || true
                  docker build \
                    --cache-from "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" \
                    --file "./Dockerfile" \
@@ -68,7 +66,7 @@ jobs:
                    . 1>/tmp/${dockerImage}.log 2>/tmp/${dockerImage}.error
                     
                  if [[ $(wc -l /tmp/${dockerImage}.error | awk '{print $1}') > 0 ]]; then
-                   echo "    - Docker Build for ${dockerImage} failed."
+                   echo "      - Docker Build for ${dockerImage} failed."
                    exit 1
                  else 
                    echo "    - Pushing Build Artifact to Docker Repo."
