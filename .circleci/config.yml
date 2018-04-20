@@ -57,7 +57,7 @@ jobs:
                  fi
 
                  echo "    - Performing Docker Build"
-                 docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 2>&1 || true
+                 docker pull "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" 2>/dev/null || true
                  docker build \
                    --cache-from "hautelook/${CIRCLE_PROJECT_REPONAME}-${dockerImage}:${DOCKER_CACHE_FROM?}" \
                    --file "./Dockerfile" \
