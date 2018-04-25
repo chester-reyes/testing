@@ -68,6 +68,7 @@ jobs:
                  echo "Rolling Back Previous To Previous Version of ${project}"
                  docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                  docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}"
+               fi 
              done
           else
              echo "There are no projects to build."
