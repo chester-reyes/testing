@@ -73,7 +73,8 @@ jobs:
                else
                  echo "Rolling Back Previous To Previous Version of ${project}"
                  docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
-                 docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}"
+                 echo " - Rolling Back Using: ${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" \
+                    && docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}"
                fi 
              done
           else
