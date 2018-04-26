@@ -53,7 +53,7 @@ jobs:
                   ROLLBACK_IMAGE=$(grep "ROLLBACK_IMAGE" ./rollback/rollback.cfg | awk -F'=' '{print $NF}')
                fi 
 
-               if [ "${ROLLBACK_ENABLED}" == "false" || "${ROLLBACK_ENABLED}" == "" ]; then
+               if [ "${ROLLBACK_ENABLED}" == "false" ] || [ "${ROLLBACK_ENABLED}" == "" ]; then
                  if [ -e "./Dockerfile" ]; then
                    echo "  - Build Initiated."
                    dockerLogin=$(docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}" 2>&1 | grep -v "WARNING")
@@ -95,6 +95,14 @@ jobs:
                  fi
                else
                  echo " - Rolling Back To Previous Version of ${dockerImage}"
+                 dockerLogin=$(docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}" 2>&1 | grep -v "WARNING")
+                 if [ "${dockerLogin}" != "Login Succeeded" ]; then
+                   echo "    - Docker Login Failed: ERROR - [${dockerLogin}]"
+                   exit 1
+                 else 
+                   echo "    - Docker ${dockerLogin}"
+                 fi
+                 
                  echo "   - Rolling Back Using ${ROLLBACK_IMAGE}" \
                    && docker pull "chre2628/${dockerImage}:${ROLLBACK_IMAGE}" 2>/dev/null 
                    || echo "   - Failed to pull ${ROLLBACK_IMAGE}"
