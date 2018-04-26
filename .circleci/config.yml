@@ -51,8 +51,6 @@ jobs:
                if [ -e "./rollback/rollback.cfg" ]; then
                   ROLLBACK_ENABLED=$(grep "ROLLBACK_ENABLED" ./rollback/rollback.cfg | awk -F'=' '{print $NF}')
                   ROLLBACK_IMAGE=$(grep "ROLLBACK_IMAGE" ./rollback/rollback.cfg | awk -F'=' '{print $NF}')
-                  echo "ROLLBACK_ENABLED: ${ROLLBACK_ENABLED}"
-                  echo "ROLLBACK_IMAGE: ${ROLLBACK_IMAGE}"
                fi 
                if [ "${ROLLBACK_ENABLED}" != "true" ]; then
                  if [ -e "./Dockerfile" ]; then
