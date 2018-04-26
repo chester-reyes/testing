@@ -12,6 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{7E134C
 		DockerFile = DockerFile
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rollback", "rollback", "{AABD421C-0140-4939-A611-50AAFF296E9B}"
+	ProjectSection(SolutionItems) = preProject
+		rollback\rollback.cfg = rollback\rollback.cfg
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
