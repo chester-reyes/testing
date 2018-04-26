@@ -43,6 +43,8 @@ jobs:
                if [ -d "${project}/rollback/rollback.cfg" ]; then     
                   ROLLBACK_ENABLED=$(grep "ROLLBACK_ENABLED" ${project/rollback/rollback.cfg | awk -F'=' '{print $NF}'})
                   ROLLBACK_IMAGE=$(grep "ROLLBACK_IMAGE" ${project/rollback/rollback.cfg | awk -F'=' '{print $NF}'})
+                  echo ${ROLLBACK_ENABLED}
+                  echo ${ROLLBACK_IMAGE}
                fi
                
                if [ "${ROLLBACK_ENABLED}" == "false" || "${ROLLBACK_ENABLED}" == "" ]; then
@@ -71,10 +73,11 @@ jobs:
                     echo "Skipping build for ${project}. No dockerfile found."
                  fi
                else
-                 echo "Rolling Back Previous To Previous Version of ${project}"
+                 echo "Rolling Back Previous To Previous Version of ${dockerImage}"
                  docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                  echo " - Rolling Back Using: ${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" \
-                    && docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" 2>/dev/null || echo "    - Rollback Failed."
+                    && docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" 2>/dev/null 
+                    || echo "    - Rollback Failed."
                fi 
              done
           else
