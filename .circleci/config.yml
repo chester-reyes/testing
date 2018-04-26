@@ -104,7 +104,7 @@ jobs:
                  fi
                  
                  echo "   - Rolling Back Using ${ROLLBACK_IMAGE}" \
-                   && docker pull "chre2628/${dockerImage}:${ROLLBACK_IMAGE}" 2>/dev/null 
+                   && docker pull "chre2628/${dockerImage}:${ROLLBACK_IMAGE}" 2>/dev/null \
                    || echo "   - Failed to pull ${ROLLBACK_IMAGE}"
                fi
              done
