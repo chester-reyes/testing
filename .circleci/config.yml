@@ -39,6 +39,7 @@ jobs:
           if [[ $(wc -l ${PROJECTS_TO_BUILD} | awk '{print $1}') > 0 ]]; then
              cat ${PROJECTS_TO_BUILD} | while read project;
              do
+               dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
                if [ -d "${project}/rollback/rollback.cfg" ]; then     
                   ROLLBACK_ENABLED=$(grep "ROLLBACK_ENABLED" ${project/rollback/rollback.cfg | awk -F'=' '{print $NF}'})
                   ROLLBACK_IMAGE=$(grep "ROLLBACK_IMAGE" ${project/rollback/rollback.cfg | awk -F'=' '{print $NF}'})
@@ -46,7 +47,6 @@ jobs:
                
                if [ "${ROLLBACK_ENABLED}" == "false" || "${ROLLBACK_ENABLED}" == "" ]; then
                  if [ -e "${project}/Dockerfile" ]; then
-                    dockerImage=$(echo $project | tr '[:upper:]' '[:lower:]' | awk -F'/' '{print $2}')
                     echo "Building ${project}..."
                     docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                     docker pull "${DOCKER_REPO?}/${dockerImage}:${DOCKER_CACHE_FROM?}" || true
@@ -74,7 +74,7 @@ jobs:
                  echo "Rolling Back Previous To Previous Version of ${project}"
                  docker login --username "${DOCKER_USERNAME?}" --password "${DOCKER_PASSWORD?}"
                  echo " - Rolling Back Using: ${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" \
-                    && docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}"
+                    && docker pull "${DOCKER_REPO?}/${dockerImage}:${ROLLBACK_IMAGE?}" 2>/dev/null || echo "    - Rollback Failed."
                fi 
              done
           else
