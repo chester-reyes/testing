@@ -104,8 +104,8 @@ jobs:
                    echo "    - Docker ${dockerLogin}"
                  fi
                  
-                 echo "    - Rolling Back to ${ROLLBACK_IMAGE}" \
-                   && docker pull "chre2628/${dockerImage}:${ROLLBACK_IMAGE}" 1>>/tmp/${dockerImage}.log /2>/dev/null \
+                 echo "    - Rolling Back Using ${ROLLBACK_IMAGE}" \
+                   && docker pull "chre2628/${dockerImage}:${ROLLBACK_IMAGE}" 1>>/tmp/${dockerImage}.log 2>/dev/null \
                    || echo "   - Failed to pull ${ROLLBACK_IMAGE}"
                fi
              done
