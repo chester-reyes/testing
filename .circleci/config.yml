@@ -66,6 +66,7 @@ jobs:
               git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" > ${AFFECTED_FILES}
             fi
             echo "- Processing Affected Files"
+            cat ${AFFECTED_FILES}
             cat ${AFFECTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | grep -v "^\." | sort | uniq | while read line;
             do
               echo "  - ${line}"
