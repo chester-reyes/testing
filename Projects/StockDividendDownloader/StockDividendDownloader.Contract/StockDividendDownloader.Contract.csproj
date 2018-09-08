@@ -7,7 +7,4 @@
   <ItemGroup>
     <ProjectReference Include="..\StockDividendDownloader.Shared\StockDividendDownloader.Shared.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Messages\" />
-  </ItemGroup>
 </Project>

@@ -3,7 +3,7 @@ namespace StockDividendDownloader.Shared.Types
 {
     public enum CallStatus
     {
-        Succeeded,
-        Failed
+        Failed,
+        Succeeded
     }
 }
