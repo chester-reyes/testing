@@ -28,19 +28,29 @@ namespace StockDividendDownloader.Logic
                 {
                     var client = new RestClient(_configuration["StockAPI:HostURL"]);
                     var StockDetails = new List<StockInfo>();
-                    foreach (var stock in request.StockList)
+
+                    foreach (var stock in request.StockList.Distinct())
                     {
                         var restRequest = new RestRequest(string.Format(_configuration["StockAPI:Resources"], stock, request.NumOfYears), Method.GET);
                         var response = client.ExecuteAsync(restRequest).Result;
-
                         if (response.StatusCode != System.Net.HttpStatusCode.OK)
                         {
-                            return new StockDividendDataRetrieverResponse
+                            if (response.StatusCode != System.Net.HttpStatusCode.NotFound)
                             {
-                                CorrelationID = request.CorrelationID,
-                                CallStatus = Shared.Types.CallStatus.Failed,
-                                Error = new Shared.Types.Error { Exception = response.ErrorException }
-                            };
+                                return new StockDividendDataRetrieverResponse
+                                {
+                                    CorrelationID = request.CorrelationID,
+                                    CallStatus = Shared.Types.CallStatus.Failed,
+                                    Error = new Shared.Types.Error { Exception = response.ErrorException }
+                                };
+                            }
+                            StockDetails.Add(new StockInfo
+                            {
+                                StockSymbol = stock,
+                                DividendDetails = new List<DividendDetail>()
+                            });
+
+                            continue;
                         }
 
                         var dividendData = JsonConvert.DeserializeObject<IEnumerable<DividendDetail>>(response.Content);

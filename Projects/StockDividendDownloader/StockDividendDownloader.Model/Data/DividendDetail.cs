@@ -10,7 +10,7 @@ namespace StockDividendDownloader.Model.Data
         public string paymentDate { get; set; }
         public string recordDate { get; set; }
         public string declaredDate { get; set; }
-        public double amount { get; set; }
+        public string amount { get; set; }
         public string flag { get; set; }
         public string type { get; set; }
         public string qualified { get; set; }

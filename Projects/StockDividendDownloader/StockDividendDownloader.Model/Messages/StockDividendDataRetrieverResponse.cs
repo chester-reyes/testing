@@ -23,7 +23,7 @@ namespace StockDividendDownloader.Model.Messages
                 StockDetails = response.StockDetails.ToList().Select(x => new Contract.Data.StockInfo
                 {
                     StockSymbol = x.StockSymbol,
-                    DividendDetails = x.DividendDetails.Select(y => new Contract.Data.DividendDetail
+                    DividendDetails = x.DividendDetails?.Select(y => new Contract.Data.DividendDetail
                     {
                         amount = y.amount,
                         declaredDate = y.declaredDate,
