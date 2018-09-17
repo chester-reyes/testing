@@ -6,14 +6,11 @@ namespace StockDividendDownloader.Contract.Data
 {
     public class DividendDetail
     {
-        public string exDate { get; set; }
-        public string paymentDate { get; set; }
-        public string recordDate { get; set; }
-        public string declaredDate { get; set; }
-        public string amount { get; set; }
-        public string flag { get; set; }
-        public string type { get; set; }
-        public string qualified { get; set; }
-        public string indicated { get; set; }
+        public string ExDate { get; set; }
+        public string Type { get; set; }
+        public string CashAmount { get; set; }
+        public string DeclarationDate { get; set; }
+        public string RecordDate { get; set; }
+        public string PaymentDate { get; set; }
     }
 }

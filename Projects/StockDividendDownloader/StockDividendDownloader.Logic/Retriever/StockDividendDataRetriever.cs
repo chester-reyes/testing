@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
@@ -20,58 +21,82 @@ namespace StockDividendDownloader.Logic
             _configuration = configuration;
         }
 
-        public async Task<StockDividendDataRetrieverResponse> Retrieve(StockDividendDataRetrieverRequest request)
+        public async Task<StockDividendRetrieverResponse> Retrieve(StockDividendRetrieverRequest request)
         {
             return await Task.Run(() =>
             {
                 try
                 {
-                    var client = new RestClient(_configuration["StockAPI:HostURL"]);
-                    var StockDetails = new List<StockInfo>();
+                    var client = new RestClient(_configuration["NASDAQ:HostURL"]);
+                    var restRequest = new RestRequest(string.Format(_configuration["NASDAQ:DividendResource"], request.StockSymbol), Method.GET);
 
-                    foreach (var stock in request.StockList.Distinct())
+                    var response = client.ExecuteAsync(restRequest).Result;
+                    var doc = new HtmlDocument();
+                    doc.LoadHtml(response.Content);
+
+                    if (response.StatusCode != System.Net.HttpStatusCode.OK)
                     {
-                        var restRequest = new RestRequest(string.Format(_configuration["StockAPI:Resources"], stock, request.NumOfYears), Method.GET);
-                        var response = client.ExecuteAsync(restRequest).Result;
-                        if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                        if (response.StatusCode != System.Net.HttpStatusCode.NotFound)
                         {
-                            if (response.StatusCode != System.Net.HttpStatusCode.NotFound)
+                            return new StockDividendRetrieverResponse
                             {
-                                return new StockDividendDataRetrieverResponse
-                                {
-                                    CorrelationID = request.CorrelationID,
-                                    CallStatus = Shared.Types.CallStatus.Failed,
-                                    Error = new Shared.Types.Error { Exception = response.ErrorException }
-                                };
-                            }
-                            StockDetails.Add(new StockInfo
-                            {
-                                StockSymbol = stock,
-                                DividendDetails = new List<DividendDetail>()
-                            });
-
-                            continue;
+                                CorrelationID = request.CorrelationID,
+                                CallStatus = Shared.Types.CallStatus.Failed,
+                                Error = new Shared.Types.Error { Exception = response.ErrorException }
+                            };
                         }
-
-                        var dividendData = JsonConvert.DeserializeObject<IEnumerable<DividendDetail>>(response.Content);
-                        StockDetails.Add(new StockInfo
-                        {
-                            StockSymbol = stock,
-                            DividendDetails = dividendData
-                        });
                     }
 
-                    return new StockDividendDataRetrieverResponse
+                    var dividendDetails = new List<DividendDetail>();
+                    var dividendTable = doc.DocumentNode.SelectSingleNode("//table[@id='quotes_content_left_dividendhistoryGrid']");
+                    if (dividendTable != null)
+                    {
+                        var tRows = dividendTable.SelectNodes("//tbody/tr");
+                        if (tRows != null)
+                        {
+                            var innerHtmls = tRows.Select(x => x.InnerHtml).ToList();
+
+                            foreach (var innerHtml in innerHtmls)
+                            {
+                                var doc2 = new HtmlDocument();
+                                doc2.LoadHtml(innerHtml);
+
+                                var tSpan = doc2.DocumentNode.SelectNodes("//span");
+                                if (tSpan != null && tSpan.Count == 5)
+                                {
+                                    dividendDetails.Add(new DividendDetail
+                                    {
+                                        ExDate = tSpan[0].InnerText,
+                                        CashAmount = tSpan[1].InnerText,
+                                        DeclarationDate = tSpan[2].InnerText,
+                                        RecordDate = tSpan[3].InnerText,
+                                        PaymentDate = tSpan[4].InnerText
+                                    });
+                                }
+
+                                if ( request.DividendHistory.Equals("CURRENT") )
+                                {
+                                    return new StockDividendRetrieverResponse
+                                    {
+                                        CorrelationID = request.CorrelationID,
+                                        CallStatus = Shared.Types.CallStatus.Succeeded,
+                                        DividendDetails = dividendDetails
+                                    };
+                                }
+                            }
+                        }
+                    }
+
+                    return new StockDividendRetrieverResponse
                     {
                         CorrelationID = request.CorrelationID,
                         CallStatus = Shared.Types.CallStatus.Succeeded,
-                        StockDetails = StockDetails
+                        DividendDetails = dividendDetails
                     };
-
                 }
                 catch (Exception ex)
                 {
-                    return new StockDividendDataRetrieverResponse
+                    return new StockDividendRetrieverResponse
                     {
                         CorrelationID = request.CorrelationID,
                         CallStatus = Shared.Types.CallStatus.Failed,

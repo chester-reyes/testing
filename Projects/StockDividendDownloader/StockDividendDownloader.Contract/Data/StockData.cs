@@ -7,6 +7,6 @@ namespace StockDividendDownloader.Contract.Data
     {
         public string StockSymbol { get; set; }
         public IEnumerable<StockDetail> StockDetails { get; set; }
-        public DateTime LastRefreshed { get; set; }
+        public IEnumerable<DividendDetail> DividendDetails { get; set; }
     }
 }

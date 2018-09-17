@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RestSharp;
 using StockDividendDownloader.Logic;
+using StockDividendDownloader.Logic.Handler;
+using StockDividendDownloader.Logic.Retriever;
 using StockDividendDownloader.Model.Interfaces;
 
 namespace StockDividendDownloader
@@ -42,6 +44,9 @@ namespace StockDividendDownloader
         {
             services.AddMvc();
             services.AddSingleton<IStockDividendDataRetriever, StockDividendDataRetriever>();
+            services.AddSingleton<IStockPriceRetriever, StockPriceRetriever>();
+            services.AddSingleton<IStockDataHandler, StockDataHandler>();
+
             services.AddSingleton<IRestClient, RestClient>();
         }
 

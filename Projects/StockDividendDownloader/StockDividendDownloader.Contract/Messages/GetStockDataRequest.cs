@@ -9,5 +9,9 @@ namespace StockDividendDownloader.Contract.Messages
     {
         [DataMember]
         public IEnumerable<string> StockList { get; set; }
+        [DataMember]
+        public string DividendHistory { get; set; }
+        [DataMember]
+        public string PriceHistory { get; set; }
     }
 }

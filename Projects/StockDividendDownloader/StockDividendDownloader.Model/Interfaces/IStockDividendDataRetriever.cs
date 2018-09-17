@@ -6,6 +6,6 @@ namespace StockDividendDownloader.Model.Interfaces
 {
     public interface IStockDividendDataRetriever
     {
-        Task<StockDividendDataRetrieverResponse> Retrieve(StockDividendDataRetrieverRequest request);
+        Task<StockDividendRetrieverResponse> Retrieve(StockDividendRetrieverRequest request);
     }
 }
