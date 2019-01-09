@@ -47,6 +47,10 @@ jobs:
                git whatchanged --name-only --pretty="" origin..HEAD | grep "^Projects" | awk -F"/" '{print $1"/"$2}' | sort | uniq >> ${PROJECTS_TO_BUILD}
             fi
 
+            if [ $? -ne 0 ]; then
+               echo "Failed to get DIFF from master branch."
+            fi
+
       - run: 
           name: "Building Docker Images For All Projects Affected"
           type: shell
