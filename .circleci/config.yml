@@ -41,39 +41,12 @@ jobs:
           name: "Determine Projects to Build."
           type: shell
           command: |
-            echo "- Retrieving commit range." \
-              && COMMIT_RANGE=$(echo $CIRCLE_COMPARE_URL | awk -F'/' '{print $NF}') 
-            [ "${COMMIT_RANGE}" == "" ] \
-              && echo "  - Failed to retrieve commit range." \
-              && exit 1 \
-              || echo "  - Commit Range: ${COMMIT_RANGE}" 
-            echo "    - Retrieving affected files using commit range."
-            if [[ $COMMIT_RANGE = *".."* ]]; then
-              [ "${CIRCLE_BRANCH}" == "master" ] \
-                && git diff $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" > ${AFFECTED_FILES} \
-                || true
-                
-              [ "${CIRCLE_BRANCH}" != "master" ] \
-                && startRange=$(echo ${COMMIT_RANGE} | awk -F"." '{print $1}') \
-                && git show ${startRange} --name-status 2>/dev/null | egrep "^[M|A|D]\s+" >> ${AFFECTED_FILES} \
-                || true
-                  
-              [ "${CIRCLE_BRANCH}" != "master" ] \
-                && endRange=$(echo ${COMMIT_RANGE} | awk -F"." '{print $NF}') \
-                && git show ${endRange} --name-status 2>/dev/null | egrep "^[M|A|D]\s+" >> ${AFFECTED_FILES} \
-                || true
-            else
-              git show $COMMIT_RANGE --name-status | egrep "^[M|A|D]\s+" > ${AFFECTED_FILES}
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+               git whatchanged --name-only --pretty="" HEAD^..HEAD | grep "^Projects" | awk -F"/" '{print $1"/"$2}' | sort | uniq >> ${PROJECTS_TO_BUILD}
+            else 
+               git whatchanged --name-only --pretty="" origin..HEAD | grep "^Projects" | awk -F"/" '{print $1"/"$2}' | sort | uniq >> ${PROJECTS_TO_BUILD}
             fi
-            echo "- Processing Affected Files"
-            cat ${AFFECTED_FILES}
-            cat ${AFFECTED_FILES} | awk '{print $2}' | awk -F"/" '{print $1"/"$2}' | grep -v "^\." | sort | uniq | while read line;
-            do
-              echo "  - ${line}"
-              if [ ! -f ${line} ]; then
-                echo ${line} >> ${PROJECTS_TO_BUILD} 
-              fi
-            done
+
       - run: 
           name: "Building Docker Images For All Projects Affected"
           type: shell
