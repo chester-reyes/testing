@@ -42,9 +42,15 @@ jobs:
           type: shell
           command: |
             if [ "${CIRCLE_BRANCH}" == "master" ]; then
-               PROJECTS_TO_BUILD=$(git whatchanged --name-only --pretty="" HEAD^..HEAD | grep "^Projects" | awk -F"/" '{print $1"/"$2}' | sort | uniq)
+               git whatchanged --name-only --pretty="" HEAD^..HEAD | awk -F"/" '{print $1"/"$2}' | sort | uniq >> ${AFFECTED_FILES}
             else 
-               PROJECTS_TO_BUILD=$(git whatchanged --name-only --pretty="" origin..HEAD | grep "^Projects" | awk -F"/" '{print $1"/"$2}' | sort | uniq)
+               git whatchanged --name-only --pretty="" origin..HEAD | awk -F"/" '{print $1"/"$2}' | sort | uniq >> ${AFFECTED_FILES}
+            fi
+
+            if [ $(grep "^Project" test.log | wc -l | awk '{print $1}') -eq 0 ]; then 
+               echo "No Projects To Build."
+            else
+               grep "^Project" ${AFFECTED_FILES} > ${PROJECTS_TO_BUILD}
             fi
 
       - run: 
